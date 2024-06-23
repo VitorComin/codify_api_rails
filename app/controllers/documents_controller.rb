@@ -30,14 +30,14 @@ class DocumentsController < ApplicationController
 
   def create
     if params[:file].present?
-      upload_result = Cloudinary::Uploader.upload(params[:file])
+      upload_result = Cloudinary::Uploader.upload(params[:file].tempfile.path, resource_type: :raw)
       if upload_result["secure_url"].present?
         encoded_password = Base64.encode64(params[:document][:security_password])
         @document = Document.new({ url: upload_result["secure_url"], active: true }.merge(document_params))
         @document.security_password = encoded_password
 
         if @document.save
-          render json: @document, status: :created
+          render json: @document.as_json(except: :security_password), status: :created
         else
           render json: @document.errors, status: :unprocessable_entity
         end
