@@ -9,7 +9,7 @@ class DocumentsController < ApplicationController
     @document = Document.find(params[:id])
 
     if @document.active
-      if @document.created_at < 24.hours.ago
+      if @document.created_at.to_time.change(usec: 0) > 24.hours.ago.to_time.change(usec: 0)
         decoded_password = Base64.decode64(@document.security_password)
         if params[:password] == decoded_password
           render json: @document
